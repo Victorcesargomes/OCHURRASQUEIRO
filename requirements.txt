@@ -1,0 +1,11 @@
+﻿groq==0.26.0
+langchain==0.3.25
+langchain-core==0.3.64
+langchain-groq==0.3.2
+langchain-text-splitters==0.3.8
+langsmith==0.3.45
+pandas==2.3.0
+python-dotenv==1.1.0
+reportlab==4.4.1
+SQLAlchemy==2.0.41
+streamlit==1.45.1
