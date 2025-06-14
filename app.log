@@ -1,0 +1,180 @@
+2025-05-25 14:50:05,050 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 14:50:24,095 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 14:54:01,287 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 14:59:34,781 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 14:59:37,899 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 14:59:42,885 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 14:59:45,354 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:00:07,130 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:00:16,685 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:01:24,311 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:01:34,122 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:01:35,588 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:01:53,561 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:01:54,686 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:02:15,889 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:02:17,010 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:02:34,116 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:02:35,134 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:02:46,298 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:02:47,330 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:03:11,594 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:03:20,458 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:03:50,646 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:03:53,904 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:03:54,932 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:04:11,190 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:04:14,062 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:04:29,212 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:04:43,698 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:05:52,372 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:08:06,285 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:08:10,794 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:08:15,894 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:08:26,152 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:08:28,622 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:08:43,209 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:08:45,832 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:08:57,990 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:09:00,538 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-25 15:09:09,230 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:09:30,995 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:09:41,588 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:09:46,685 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:09:47,622 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 15:10:03,605 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 16:11:02,242 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-05-25 20:23:59,013 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:50:14,676 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:50:31,534 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:50:38,875 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:51:27,834 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:51:30,460 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:52:41,606 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:52:44,382 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:52:59,762 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:53:02,473 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:54:04,967 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:54:07,725 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:54:18,664 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:54:21,299 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:54:29,438 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:54:32,082 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 11:58:47,156 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:58:59,426 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 11:59:01,539 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:07:01,529 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:07:21,100 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:07:24,161 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:07:46,057 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:07:47,418 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:08:20,684 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:08:22,026 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:09:22,048 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:09:23,577 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:09:46,063 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:09:47,379 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:12:17,101 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:12:29,595 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:12:31,212 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:17:07,428 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:17:37,057 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:17:38,823 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:18:38,246 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:18:51,627 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:18:56,940 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:22:07,331 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:22:14,741 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:22:15,734 — INFO — Registro salvo em C:\Users\victo\OneDrive\Desktop\OCHURRASQUEIRO\financeiro.db
+2025-06-01 12:22:20,183 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:22:21,466 — INFO — Registro salvo em C:\Users\victo\OneDrive\Desktop\OCHURRASQUEIRO\financeiro.db
+2025-06-01 12:23:24,375 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:24:02,413 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:24:04,152 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:24:59,686 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:25:00,637 — INFO — Registro salvo em C:\Users\victo\OneDrive\Desktop\OCHURRASQUEIRO\financeiro.db
+2025-06-01 12:25:00,763 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:26:08,851 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:27:38,017 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:27:39,581 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:29:54,072 — INFO — Certidões indexadas: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:35:04,855 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:35:15,557 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:35:40,220 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:35:49,505 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:35:56,461 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:35:57,606 — WARNING — >>> Banco zerado por comando do usuário <<<
+2025-06-01 12:35:57,769 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:36:34,220 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:36:36,377 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:37:28,618 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:37:29,703 — INFO — Registro salvo — {'valor': 180.0, 'tipo': 'despesa', 'data': '2025-06-01', 'descricao': 'aluguel bancada'}
+2025-06-01 12:37:29,833 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:38:21,419 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:38:22,330 — INFO — Registro salvo — {'valor': 250.0, 'tipo': 'faturamento', 'data': '2025-06-05', 'descricao': 'combo familia'}
+2025-06-01 12:38:22,539 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:39:32,151 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:39:33,091 — INFO — Registro salvo — {'valor': 180.0, 'tipo': 'faturamento', 'data': '2025-06-01', 'descricao': 'troca de tela iphone'}
+2025-06-01 12:39:33,216 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:39:49,032 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:39:50,750 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:40:38,650 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:40:39,734 — WARNING — >>> Banco zerado por comando do usuário <<<
+2025-06-01 12:40:39,869 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:41:32,295 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:41:33,103 — WARNING — >>> Banco zerado por comando do usuário <<<
+2025-06-01 12:41:33,219 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:41:35,052 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:44:39,431 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:45:21,683 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:45:23,328 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:46:14,473 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:46:15,383 — INFO — Registro salvo — {'valor': 80.0, 'tipo': 'faturamento', 'data': '2025-06-01', 'descricao': 'combo familia'}
+2025-06-01 12:46:15,514 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:46:54,898 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:46:55,839 — INFO — Registro salvo — {'valor': 120.0, 'tipo': 'despesa', 'data': '2025-06-05', 'descricao': 'gás'}
+2025-06-01 12:46:55,973 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:47:09,889 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:47:11,561 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:47:44,175 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:47:45,753 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:47:57,259 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:47:58,910 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:49:07,765 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:49:08,960 — INFO — Registro salvo — {'valor': 58.0, 'tipo': 'faturamento', 'data': '2025-06-06', 'descricao': 'combo especial'}
+2025-06-01 12:49:09,111 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:49:29,696 — INFO — Certidões: {'ibson dantas cnd estadual': WindowsPath('certidoes/ibson_dantas_cnd_estadual.pdf')}
+2025-06-01 12:49:31,400 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 12:58:40,102 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:04:53,308 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:10:39,306 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:13:02,411 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:13:19,323 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:14:01,139 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:14:34,440 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:19:16,365 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:20:01,420 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:20:15,472 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:20:37,144 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:20:52,327 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:21:21,608 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:21:36,347 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 13:22:06,274 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 14:30:37,660 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-01 14:31:00,502 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-03 21:09:51,029 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 18:10:47,510 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 18:11:17,424 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 18:12:58,164 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 18:13:28,382 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 18:40:48,530 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 18:41:05,022 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 19:11:00,538 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 19:11:36,572 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 19:13:02,482 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 19:53:21,925 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 20:01:50,364 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-10 20:12:34,632 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-14 11:13:31,660 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-14 11:18:58,906 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-14 11:47:33,995 — INFO — HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
