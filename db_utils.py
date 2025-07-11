@@ -4,14 +4,23 @@ import logging
 import re
 import sqlite3
 import atexit
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Literal, TypedDict, Optional, List, Dict, Any
 
 import pandas as pd
 
-BASE_PATH = Path(__file__).parent
-DB_PATH = BASE_PATH / "financeiro.db"
+# Verifica se estamos no Render (com disco persistente)
+if os.environ.get("RENDER"):
+    # Define o caminho do banco de dados no diretório persistente
+    DB_PATH = Path("/data") / "financeiro.db"
+    # Garante que o diretório existe
+    Path("/data").mkdir(parents=True, exist_ok=True)
+else:
+    # Comportamento local
+    BASE_PATH = Path(__file__).parent
+    DB_PATH = BASE_PATH / "financeiro.db"
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +48,7 @@ def _conn() -> sqlite3.Connection:
     global _conn_singleton
     if _conn_singleton is None:
         _conn_singleton = sqlite3.connect(
-            DB_PATH,
+            str(DB_PATH),  # Convertendo para string para compatibilidade
             check_same_thread=False,
             detect_types=sqlite3.PARSE_DECLTYPES,
         )
