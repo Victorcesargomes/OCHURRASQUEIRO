@@ -5,6 +5,7 @@ CRC:  PE-034089/O-6
 """
 
 import logging, os
+import shutil
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -29,7 +30,6 @@ from db_utils import (
     totais,
 )
 
-
 # Função para limpar cache de transações
 def clear_transactions_cache():
     """Limpa todos os caches de transações de forma segura"""
@@ -40,12 +40,19 @@ BASE_PATH   = Path(__file__).parent
 CLIENT_NAME = "O Churrasqueiro"
 MODEL_NAME  = "deepseek-r1-distill-llama-70b"
 
+# Configuração do caminho do log (persistente no Render)
+if os.environ.get("RENDER"):
+    LOG_PATH = Path("/data") / "app.log"
+    Path("/data").mkdir(parents=True, exist_ok=True)
+else:
+    LOG_PATH = BASE_PATH / "app.log"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s — %(levelname)s — %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(BASE_PATH / "app.log")
+        logging.FileHandler(LOG_PATH)
     ],
 )
 
@@ -272,6 +279,21 @@ def paginated_transactions(df: pd.DataFrame, page_size: int = 10) -> tuple[pd.Da
     start_idx = (page - 1) * page_size
     return df.iloc[start_idx:start_idx + page_size], total_pages
 
+# ---------- Função para monitorar espaço em disco -----------------
+def monitorar_espaco():
+    if os.environ.get("RENDER"):
+        try:
+            # Verifica o espaço livre no diretório /data
+            uso = shutil.disk_usage("/data")
+            livre_mb = uso.free / (1024 * 1024)
+            st.sidebar.caption(f"🛢️ Armazenamento: {livre_mb:.1f} MB livres")
+            if livre_mb < 50:
+                st.sidebar.warning("Espaço em disco crítico!")
+        except Exception as e:
+            st.sidebar.error(f"Erro ao verificar disco: {str(e)}")
+    else:
+        st.sidebar.caption("💾 Modo local: dados não persistentes")
+
 # ---------- Interface (sidebar) ------------------------------------
 def sidebar():
     with st.sidebar:
@@ -280,6 +302,9 @@ def sidebar():
             use_container_width=True,
             caption="O Churrasqueiro"
         )
+
+        # Mostra o espaço em disco se estiver no Render
+        monitorar_espaco()
 
         tabs = st.tabs(["Chat", "Financeiro", "Config"])
 
@@ -471,6 +496,25 @@ def chat_page():
     mem.chat_memory.add_user_message(entrada)
     mem.chat_memory.add_ai_message(resposta)
     st.session_state["memoria"] = mem
+
+# ---------- Prevenir hibernação no Render --------------------------
+if os.environ.get("RENDER"):
+    import threading
+    import requests
+    import time
+
+    def keep_alive():
+        while True:
+            try:
+                # Tenta acessar a própria aplicação
+                requests.get("https://seu-app.onrender.com", timeout=10)
+                logging.info("Ping enviado para prevenir hibernação")
+            except Exception as e:
+                logging.error(f"Erro no ping: {str(e)}")
+            time.sleep(240)  # 4 minutos (Render hiberna após 15-30 min)
+
+    # Inicia em thread separada
+    threading.Thread(target=keep_alive, daemon=True).start()
 
 # ---------- Entry-point --------------------------------------------
 def main():
