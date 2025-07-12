@@ -1,532 +1,528 @@
 from __future__ import annotations
-"""
-BY Contador: Victor Ribeiro /
-CRC:  PE-034089/O-6
-"""
 
-import logging, os
-import shutil
+import logging
+import os
+import re
+import unicodedata
 from datetime import datetime
-from io import BytesIO
 from pathlib import Path
+from typing import Tuple, Optional, List, Dict, Any
 
 import pandas as pd
 import streamlit as st
+import plotly.express as px
+import requests
 from dotenv import load_dotenv
-from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationSummaryBufferMemory
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib import colors
+from langchain.schema import BaseMessage, HumanMessage, AIMessage
 
-from db_utils import (
-    deletar,
-    faturamento_por_descricao,
-    despesa_por_descricao,
-    inserir,
-    listar_transacoes,
-    tentar_extrair_comando,
-    totais,
-)
-
-# Função para limpar cache de transações
-def clear_transactions_cache():
-    """Limpa todos os caches de transações de forma segura"""
-    st.cache_data.clear()  # Método universal que funciona em todas versões do Streamlit
-
-# ---------- Config -------------------------------------------------
-BASE_PATH   = Path(__file__).parent
+########################
+# Configurações gerais #
+########################
+BASE_PATH = Path(__file__).parent
+CSV_PATH = BASE_PATH / "dados.csv"
+CERT_PATH = BASE_PATH / "certidoes"
+LOGO_PATH = BASE_PATH / "logoo.png"
 CLIENT_NAME = "O Churrasqueiro"
-MODEL_NAME  = "deepseek-r1-distill-llama-70b"
-
-# Configuração do caminho do log (persistente no Render)
-if os.environ.get("RENDER"):
-    LOG_PATH = Path("/data") / "app.log"
-    Path("/data").mkdir(parents=True, exist_ok=True)
-else:
-    LOG_PATH = BASE_PATH / "app.log"
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s — %(levelname)s — %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(LOG_PATH)
-    ],
-)
+MODEL_NAME = "deepseek-r1-distill-llama-70b"
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
+CONTABIL_API_URL = os.getenv("CONTABIL_API_URL")
+
 if not API_KEY:
-    st.error("GROQ_API_KEY não definida!")
+    st.error("Variável GROQ_API_KEY não encontrada.")
     st.stop()
 
-# ---------- Cached helpers (performance) ---------------------------
-@st.cache_data(ttl=300)
-def listar_transacoes_cached(
-    data_inicio: str | None = None, 
-    data_fim: str | None = None
-) -> pd.DataFrame:
-    return listar_transacoes(data_inicio, data_fim)
+#########################
+# Configuração do logger #
+#########################
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s — %(levelname)s — %(message)s",
+    handlers=[logging.FileHandler(BASE_PATH / "app.log"), logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
 
-@st.cache_data(ttl=300)
-def faturamento_por_descricao_cached(
-    data_inicio: str | None = None, 
-    data_fim: str | None = None
-) -> pd.DataFrame:
-    return faturamento_por_descricao(data_inicio, data_fim)
+######################################
+# Index simples das certidões locais #
+######################################
 
-@st.cache_data(ttl=300)
-def despesa_por_descricao_cached(
-    data_inicio: str | None = None, 
-    data_fim: str | None = None
-) -> pd.DataFrame:
-    return despesa_por_descricao(data_inicio, data_fim)
+def indexar_certidoes(pasta: Path) -> dict[str, Path]:
+    """Cria um dicionário {slug_ascii: filepath} para pesquisa rápida."""
+    index: dict[str, Path] = {}
+    if pasta.exists():
+        for arquivo in pasta.glob("*.pdf"):
+            slug = (
+                arquivo.stem.lower()
+                .replace("_", " ")
+                .replace("-", " ")
+                .replace("  ", " ")
+                .strip()
+            )
+            slug_ascii = unicodedata.normalize("NFKD", slug).encode("ascii", "ignore").decode("ascii")
+            index[slug_ascii] = arquivo
+    return index
 
-# ---------- Funções utilitárias otimizadas ------------------------
-def get_totais(
-    data_inicio: str | None = None, 
-    data_fim: str | None = None
-) -> tuple[float, float, float]:
-    t = totais(data_inicio, data_fim)
-    return t.get("faturamento", 0.0), t.get("despesa", 0.0), t.get("faturamento", 0.0) - t.get("despesa", 0.0)
+CERTIDOES = indexar_certidoes(CERT_PATH)
+logger.info("Certidões indexadas: %s", CERTIDOES)
 
-def gerar_pdf(df: pd.DataFrame, data_inicio: str | None = None, data_fim: str | None = None) -> BytesIO:
-    """Gera relatório PDF com tabela formatada e período no título."""
-    buf = BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=letter)
-    
-    data = [["ID", "Data", "Tipo", "Valor (R$)", "Descrição"]]
-    for _, r in df.iterrows():
-        data.append([
-            str(int(r.id)),
-            r.data.strftime('%d/%m/%Y'),
-            r.tipo.capitalize(),
-            f"{r.valor:,.2f}",
-            r.descricao or ''
-        ])
-    
-    table = Table(data)
-    style = TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#4b6cb7")),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 10),
-        ('BOTTOMPADDING', (0,0), (-1,0), 12),
-        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor("#f0f2f6")),
-        ('GRID', (0,0), (-1,-1), 1, colors.black)
-    ])
-    table.setStyle(style)
-    
-    elements = []
-    
-    titulo = f"Relatório Financeiro - {CLIENT_NAME}"
-    if data_inicio or data_fim:
-        periodo = "Período: "
-        if data_inicio:
-            periodo += f"{datetime.fromisoformat(data_inicio).strftime('%d/%m/%Y')}"
-        else:
-            periodo += "início"
-        if data_fim:
-            periodo += f" a {datetime.fromisoformat(data_fim).strftime('%d/%m/%Y')}"
-        else:
-            periodo += " a hoje"
-        titulo += f" ({periodo})"
-    
-    elements.append(Table([[titulo]], style=[
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTSIZE', (0,0), (-1,-1), 14),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 12),
-    ]))
-    elements.append(Table([[f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"]], style=[
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTSIZE', (0,0), (-1,-1), 10),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 20),
-    ]))
-    elements.append(table)
-    
-    # Seção de faturamento
-    df_fat = df[df['tipo']=='faturamento']
-    if not df_fat.empty:
-        total_fat = df_fat['valor'].sum()
-        resumo = df_fat.groupby('descricao')['valor'].sum().reset_index()
-        resumo = resumo.sort_values('valor', ascending=False)
-        resumo['descricao'] = resumo['descricao'].fillna('(sem descrição)')
-        
-        elements.append(Table([[""]], style=[('SPACEAFTER', (0,0), (-1,-1), 20)]))
-        elements.append(Table([["Resumo de Faturamento por Descrição"]], style=[
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#2c7744")),
-            ('TEXTCOLOR', (0,0), (-1,-1), colors.whitesmoke),
-            ('FONTSIZE', (0,0), (-1,-1), 12),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-        ]))
-        resumo_data = [["Descrição", "Total (R$)"]]
-        for _, r in resumo.iterrows():
-            resumo_data.append([r['descricao'], f"{r['valor']:,.2f}"])
-        resumo_data.append(["**TOTAL**", f"**{total_fat:,.2f}**"])
-        resumo_table = Table(resumo_data)
-        resumo_style = TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#5a9c76")),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('BACKGROUND', (0,1), (-1,-2), colors.HexColor("#e8f5e9")),
-            ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#ffcc80")),
-            ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
-            ('GRID', (0,0), (-1,-1), 1, colors.black)
-        ])
-        resumo_table.setStyle(resumo_style)
-        elements.append(resumo_table)
-    
-    # Seção de despesas
-    df_desp = df[df['tipo']=='despesa']
-    if not df_desp.empty:
-        total_desp = df_desp['valor'].sum()
-        resumo_desp = df_desp.groupby('descricao')['valor'].sum().reset_index()
-        resumo_desp = resumo_desp.sort_values('valor', ascending=False)
-        resumo_desp['descricao'] = resumo_desp['descricao'].fillna('(sem descrição)')
-        
-        elements.append(Table([[""]], style=[('SPACEAFTER', (0,0), (-1,-1), 20)]))
-        elements.append(Table([["Resumo de Despesas por Descrição"]], style=[
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#a52a2a")),
-            ('TEXTCOLOR', (0,0), (-1,-1), colors.whitesmoke),
-            ('FONTSIZE', (0,0), (-1,-1), 12),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-        ]))
-        resumo_data_desp = [["Descrição", "Total (R$)"]]
-        for _, r in resumo_desp.iterrows():
-            resumo_data_desp.append([r['descricao'], f"{r['valor']:,.2f}"])
-        resumo_data_desp.append(["**TOTAL**", f"**{total_desp:,.2f}**"])
-        resumo_table_desp = Table(resumo_data_desp)
-        resumo_style_desp = TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#cd5c5c")),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('BACKGROUND', (0,1), (-1,-2), colors.HexColor("#ffebee")),
-            ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#ffcc80")),
-            ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
-            ('GRID', (0,0), (-1,-1), 1, colors.black)
-        ])
-        resumo_table_desp.setStyle(resumo_style_desp)
-        elements.append(resumo_table_desp)
-    
-    doc.build(elements)
-    buf.seek(0)
-    return buf
+###############################
+# Utilitários de normalização #
+###############################
 
-# ---------- LLM ----------------------------------------------------
-client = ChatGroq(api_key=API_KEY, model=MODEL_NAME)
-MEM_DEFAULT = ConversationBufferWindowMemory(k=5, return_messages=True)
+def normalizar_txt(txt: str) -> str:
+    """Remove acentos, caixa alta e símbolos não alfanuméricos."""
+    ascii_txt = unicodedata.normalize("NFKD", txt).encode("ascii", "ignore").decode("ascii")
+    ascii_txt = re.sub(r"[^a-z0-9 ]", " ", ascii_txt.lower())
+    ascii_txt = re.sub(r"\s+", " ", ascii_txt).strip()
+    return ascii_txt
 
-def make_prompt() -> ChatPromptTemplate:
-    fat, dep, saldo = get_totais()
-    sys = (
-        f"Você é Victor, assistente virtual da hamburgueria O Churrasqueiro. O usuário chama-se Ibson Dantas, portanto, você sempre vai falar com Ibson Dantas. Além disso, responda somente o que o usuário pede"
-        f"OChurrasqueiro\"{CLIENT_NAME}\".\n"
-        f"Resumo financeiro {datetime.now():%d/%m/%Y}: "
-        f"Faturamento R$ {fat:,.2f}, Despesas R$ {dep:,.2f}, Saldo R$ {saldo:,.2f}."
-    )
-    anti = "Só utilize fatos válidos do resumo financeiro acima; se não souber, diga 'não sei'."
-    return ChatPromptTemplate.from_messages([
-        ("system", sys),
-        ("system", anti),
-        ("placeholder", "{chat_history}"),
-        ("user", "{input}")
-    ])
+###############################
+# Funções utilitárias do CSV  #
+###############################
+@st.cache_data(show_spinner=False)
+def carregar_df(caminho: Path) -> pd.DataFrame:
+    """Lê o CSV do cliente com colunas: Data, faturamento, despesa, descricao, lucro."""
+    try:
+        df = pd.read_csv(caminho, sep=";", dtype=str)
+        df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
 
-# ---------- Persistência via chat ----------------------------------
-def registrar_if_needed(msg: str) -> bool:
-    reg = tentar_extrair_comando(msg)
-    if not reg:
-        return False
-    inserir(reg)
-    
-    # Limpa todos os caches relevantes
-    clear_transactions_cache()
-    
-    st.session_state["toast"] = (
-        f"✅ {reg['tipo'].capitalize()} de R$ {reg['valor']:,.2f} salvo!"
-        + (f" — {reg['descricao']}" if reg['descricao'] else "")
-    )
-    st.rerun()
-    return True
+        def _parse_money(txt: str):
+            if pd.isna(txt) or txt == "":
+                return 0.0
+            txt = txt.strip().replace("\u00A0", "")
+            txt = txt.replace(".", "").replace(",", ".")
+            return float(txt)
 
-# ---------- Paginação de resultados -------------------------------
-def paginated_transactions(df: pd.DataFrame, page_size: int = 10) -> tuple[pd.DataFrame, int]:
-    if df.empty:
-        return df, 0
-    
-    total_pages = (len(df) + page_size - 1) // page_size
-    page = st.session_state.get("current_page", 1)
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col1:
-        if st.button("◀ Anterior", disabled=(page <= 1), use_container_width=True):
-            st.session_state["current_page"] = max(1, page - 1)
-            st.rerun()
-    with col2:
-        st.markdown(f"**Página {page} de {total_pages}**", unsafe_allow_html=True)
-    with col3:
-        if st.button("Próximo ▶", disabled=(page >= total_pages), use_container_width=True):
-            st.session_state["current_page"] = min(total_pages, page + 1)
-            st.rerun()
-    
-    start_idx = (page - 1) * page_size
-    return df.iloc[start_idx:start_idx + page_size], total_pages
+        for col in ("faturamento", "despesa", "lucro"):
+            df[col] = df[col].apply(_parse_money)
 
-# ---------- Função para monitorar espaço em disco -----------------
-def monitorar_espaco():
-    if os.environ.get("RENDER"):
-        try:
-            # Verifica o espaço livre no diretório /data
-            uso = shutil.disk_usage("/data")
-            livre_mb = uso.free / (1024 * 1024)
-            st.sidebar.caption(f"🛢️ Armazenamento: {livre_mb:.1f} MB livres")
-            if livre_mb < 50:
-                st.sidebar.warning("Espaço em disco crítico!")
-        except Exception as e:
-            st.sidebar.error(f"Erro ao verificar disco: {str(e)}")
-    else:
-        st.sidebar.caption("💾 Modo local: dados não persistentes")
+        df["data"] = pd.to_datetime(df["data"], dayfirst=True, errors="coerce")
+        return df
+    except Exception as exc:
+        logger.exception("Erro ao carregar CSV: %s", exc)
+        st.error(f"Erro ao carregar {caminho.name}: {exc}")
+        return pd.DataFrame()
 
-# ---------- Interface (sidebar) ------------------------------------
-def sidebar():
-    with st.sidebar:
-        st.sidebar.image(
-            "logoo.png",
-            use_container_width=True,
-            caption="O Churrasqueiro"
+def df_para_prompt(df: pd.DataFrame) -> str:
+    """Formata o DataFrame para exibição no prompt, com valores em Reais formatados."""
+    df_display = df.copy()
+    # Formata as colunas numéricas para o padrão brasileiro
+    for col in ('faturamento', 'despesa', 'lucro'):
+        df_display[col] = df_display[col].apply(
+            lambda x: f'R$ {x:,.2f}'.replace(",", "X").replace(".", ",").replace("X", ".")
         )
+    return df_display.to_csv(index=False, sep=";")
 
-        # Mostra o espaço em disco se estiver no Render
-        monitorar_espaco()
+dados_df = carregar_df(CSV_PATH)
 
-        tabs = st.tabs(["Chat", "Financeiro", "Config"])
+# Resumos financeiros
+faturamento_total = dados_df["faturamento"].sum() if not dados_df.empty else 0.0
+despesa_total = dados_df["despesa"].sum() if not dados_df.empty else 0.0
+lucro_total = dados_df["lucro"].sum() if not dados_df.empty else 0.0
 
-        # Chat
-        with tabs[0]:
-            if st.button("🗑️ Limpar histórico", use_container_width=True):
-                st.session_state["memoria"] = ConversationBufferWindowMemory(
-                    k=5, return_messages=True
+##############################
+# Análise Financeira Avançada #
+##############################
+
+def analisar_financas(df: pd.DataFrame) -> Dict[str, Any]:
+    """Realiza análise detalhada das finanças."""
+    if df.empty:
+        return {}
+    
+    # Top 5 despesas
+    top_despesas = df.nlargest(5, 'despesa')[['descricao', 'despesa']] if not df.empty else pd.DataFrame()
+    # Faturamento médio diário (considerando dias com faturamento)
+    faturamento_medio_diario = df[df['faturamento'] > 0]['faturamento'].mean() if not df.empty else 0.0
+    # Margem de lucro (lucro total / faturamento total)
+    if not df.empty and df['faturamento'].sum() > 0:
+        margem_lucro = (df['lucro'].sum() / df['faturamento'].sum()) * 100
+    else:
+        margem_lucro = 0.0
+    # Despesas recorrentes (agrupadas por descrição, somadas e as 5 maiores)
+    despesas_recorrentes = df[df['despesa'] > 0].groupby('descricao')['despesa'].sum().nlargest(5) if not df.empty else pd.Series()
+    
+    return {
+        "top_despesas": top_despesas,
+        "faturamento_medio_diario": faturamento_medio_diario,
+        "margem_lucro": margem_lucro,
+        "despesas_recorrentes": despesas_recorrentes
+    }
+
+analise = analisar_financas(dados_df)
+
+############################
+# Visualizações de Dados #
+############################
+
+def plot_despesas(df: pd.DataFrame):
+    """Gráfico de pizza das top 10 despesas por valor total."""
+    if df.empty:
+        return None
+        
+    despesas_agrupadas = df[df['despesa'] > 0].groupby('descricao')['despesa'].sum().nlargest(10)
+    if despesas_agrupadas.empty:
+        return None
+        
+    despesas_df = despesas_agrupadas.reset_index()
+    despesas_df.columns = ['descricao', 'valor_total']
+    
+    fig = px.pie(
+        despesas_df,
+        names='descricao',
+        values='valor_total',
+        title='Top 10 Despesas (Valor Total)',
+        hole=0.3
+    )
+    fig.update_traces(
+        textposition='inside',
+        textinfo='percent+label',
+        hovertemplate='<b>%{label}</b><br>R$ %{value:,.2f} (%{percent})'
+    )
+    fig.update_layout(
+        uniformtext_minsize=12,
+        uniformtext_mode='hide',
+        margin=dict(t=50, b=20, l=20, r=20)
+    )
+    return fig
+
+def plot_evolucao(df: pd.DataFrame, data_inicio: datetime, data_fim: datetime):
+    """Gráfico de linha da evolução financeira no período."""
+    df_periodo = df[(df['data'] >= data_inicio) & (df['data'] <= data_fim)]
+    if df_periodo.empty:
+        return None
+        
+    # Agrupar por dia e somar valores
+    df_agrupado = df_periodo.groupby('data')[['faturamento', 'despesa', 'lucro']].sum().reset_index()
+    
+    fig = px.line(
+        df_agrupado,
+        x='data',
+        y=['faturamento', 'despesa', 'lucro'],
+        title=f'Evolução Financeira: {data_inicio.strftime("%d/%m/%Y")} - {data_fim.strftime("%d/%m/%Y")}',
+        labels={'value': 'Valor (R$)', 'variable': 'Indicador'},
+        color_discrete_map={
+            'faturamento': '#2ecc71',
+            'despesa': '#e74c3c',
+            'lucro': '#3498db'
+        }
+    )
+    
+    fig.update_layout(
+        hovermode='x unified',
+        legend_title_text='',
+        xaxis_title='Data',
+        yaxis_title='Valor (R$)',
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
+    
+    fig.update_traces(
+        hovertemplate='<b>%{y:,.2f}</b>',
+        mode='lines+markers'
+    )
+    
+    return fig
+
+###################################
+# Configuração do modelo (Groq LLM) #
+###################################
+client = ChatGroq(api_key=API_KEY, model=MODEL_NAME)
+MEMORIA_PADRAO = ConversationSummaryBufferMemory(
+    llm=client,
+    max_token_limit=2000,
+    return_messages=True
+)
+
+# Preparar a mensagem do sistema
+system_message = f"""
+Você é Victor, assistente virtual da hamburgueria \"{CLIENT_NAME}\" do Ibson.
+Fale **sempre** em português brasileiro, de forma clara e objetiva.
+Ignore qualquer texto entre as tags <think> e </think>; trate‑o como nota interna que NÃO deve ser respondida nem exibida.
+Você interage exclusivamente com o Ibson, dono da hamburgueria.
+
+**DIRETRIZES DE RESPOSTA:**
+1. Seja conciso em respostas diretas. Evite textos longos quando a pergunta for simples.
+2. Para perguntas objetivas, responda de forma direta com no máximo 2 frases.
+3. Para perguntas sobre valores financeiros, mostre apenas os números relevantes.
+4. Para pedidos de certidões, forneça imediatamente o link de download.
+5. Respostas devem ocupar no máximo 3 linhas quando possível.
+6. Use negrito apenas para valores numéricos importantes.
+
+**Resumo financeiro até {datetime.now().strftime('%d/%m/%Y')}**:
+- **Faturamento acumulado:** R$ {faturamento_total:,.2f}
+- **Despesa acumulada:** R$ {despesa_total:,.2f}
+- **Lucro acumulado:** R$ {lucro_total:,.2f}
+
+**Análise detalhada**:
+- **Top 5 despesas**: 
+{analise['top_despesas'].to_string(index=False) if not analise['top_despesas'].empty else 'Nenhuma despesa registrada'}
+- **Faturamento médio diário**: R$ {analise['faturamento_medio_diario']:,.2f}
+- **Margem de lucro**: {analise['margem_lucro']:.2f}%
+- **Principais despesas recorrentes**: 
+{analise['despesas_recorrentes'].to_string() if not analise['despesas_recorrentes'].empty else 'Nenhuma despesa recorrente'}
+
+Eu também tenho acesso às seguintes certidões (PDF):
+{', '.join(CERTIDOES.keys()) or 'nenhuma'}
+
+Base de dados detalhada:
+###
+{df_para_prompt(dados_df)}
+###
+
+- As colunas correspondem a `Data`, `Faturamento`, `Despesa`, `Descrição` e `Lucro`.
+- Todos os valores estão em Reais (BRL).
+
+Se precisar de uma certidão, basta pedir — exemplos: “quero a CND estadual”, “quero a CND FGTS”, "quero a CND federal", "quero a CND fiscal etc.
+
+Termine perguntando se precisa de algo mais.
+"""
+
+prompt_template = ChatPromptTemplate.from_messages([
+    ("system", system_message),
+    ("placeholder", "{chat_history}"),
+    ("user", "{input}"),
+])
+
+chain = prompt_template | client
+
+#######################################
+# Funções para envio de certidões PDF #
+#######################################
+
+CATEGORIAS_CERT = {
+    "estadual": "Estadual",
+    "federal": "Federal",
+    "municipal": "Municipal",
+    "fgts": "FGTS",
+    "fiscal": "Fiscal",
+}
+
+def tentar_enviar_certidao(mensagem: str) -> Tuple[Optional[Path], Optional[str]]:
+    """Retorna (Path, categoria) da certidão solicitada ou (None, None)."""
+    txt = normalizar_txt(mensagem)
+
+    # Verifica se mensagem contém 'cnd' ou 'certidao'
+    if "cnd" not in txt and "certidao" not in txt:
+        return None, None
+
+    for cat_slug, cat_nome in CATEGORIAS_CERT.items():
+        if cat_slug in txt:
+            # Procura arquivo cujo slug contenha a categoria
+            for slug, path in CERTIDOES.items():
+                if cat_slug in slug and ("cnd" in slug or "certidao" in slug):
+                    return path, cat_nome
+    return None, None
+
+################################
+# Integração com Contabilidade #
+################################
+
+def enviar_contabilidade(df: pd.DataFrame) -> bool:
+    """Envia dados para sistema contábil externo."""
+    if not CONTABIL_API_URL:
+        logger.warning("URL da API contábil não configurada.")
+        return False
+    try:
+        # Converter DataFrame para JSON
+        dados_json = df.to_dict(orient='records')
+        response = requests.post(CONTABIL_API_URL, json=dados_json, timeout=10)
+        if response.status_code == 200:
+            logger.info("Dados enviados para contabilidade com sucesso.")
+            return True
+        logger.error("Erro ao enviar dados: %s", response.text)
+        return False
+    except Exception as exc:
+        logger.exception("Erro na integração contábil: %s", exc)
+        return False
+
+###########################
+# Funções para o modelo   #
+###########################
+
+@st.cache_data(show_spinner="Processando sua pergunta...")
+def consultar_modelo(_memoria: ConversationSummaryBufferMemory, entrada: str) -> str:
+    """Consulta o modelo com cache para melhor desempenho."""
+    try:
+        resposta = chain.invoke({
+            "input": entrada,
+            "chat_history": _memoria.chat_memory.messages
+        }).content
+        return resposta
+    except Exception as exc:
+        logger.exception("Erro na chamada do LLM: %s", exc)
+        return "❌ Ocorreu um erro ao processar sua solicitação."
+
+###########################
+# Interface Streamlit     #
+###########################
+
+def desenhar_sidebar() -> None:
+    with st.sidebar:
+        st.image(LOGO_PATH, use_container_width=True)  # Parâmetro atualizado
+        abas = st.tabs(["Conversas", "Configurações"])
+
+        with abas[0]:
+            if st.button("🗑️ Apagar Histórico", use_container_width=True):
+                st.session_state["memoria"] = ConversationSummaryBufferMemory(
+                    llm=client,
+                    max_token_limit=2000,
+                    return_messages=True
                 )
-                st.toast("Histórico limpo!")
+                st.success("Histórico apagado!")
 
-        # Financeiro
-        with tabs[1]:
-            st.subheader("Filtrar por Período")
-            col1, col2 = st.columns(2)
-            with col1:
-                data_inicio = st.date_input(
-                    "Data Inicial",
-                    value=None,
-                    key="filtro_data_inicio"
-                )
-            with col2:
-                data_fim = st.date_input(
-                    "Data Final",
-                    value=None,
-                    key="filtro_data_fim"
-                )
-            
-            data_inicio_str = data_inicio.isoformat() if data_inicio else None
-            data_fim_str = data_fim.isoformat() if data_fim else None
-            
-            if st.button("🧹 Limpar Filtros", use_container_width=True):
-                st.session_state.filtro_data_inicio = None
-                st.session_state.filtro_data_fim = None
-                st.rerun()
-            
-            fat, dep, saldo = get_totais(data_inicio_str, data_fim_str)
-            
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Faturamento", f"R$ {fat:,.2f}")
-            col2.metric("Despesas",   f"R$ {dep:,.2f}")
-            col3.metric("Saldo",      f"R$ {saldo:,.2f}")
-            
-            df_full = listar_transacoes_cached(data_inicio_str, data_fim_str)
-            
-            if df_full.empty:
-                st.info("Sem lançamentos.")
+        with abas[1]:
+            st.header("⚙️ Configurações")
+            st.markdown(
+                f"""
+                - **Modelo:** {MODEL_NAME}
+                - **Usuário autorizado:** Ibson ({CLIENT_NAME})
+                - **Linhas CSV:** {len(dados_df)}
+                - **Certidões disponíveis:** {', '.join(CERTIDOES) or 'nenhuma'}
+                """
+            )
+            if CONTABIL_API_URL:
+                if st.button("📤 Enviar Dados para Contabilidade"):
+                    if enviar_contabilidade(dados_df):
+                        st.success("Dados enviados com sucesso!")
+                    else:
+                        st.error("Falha no envio. Verifique logs.")
             else:
-                page_size = st.select_slider(
-                    "Itens por página", 
-                    options=[5, 10, 20, 50], 
-                    value=10,
-                    key="page_size"
-                )
-                
-                df_page, total_pages = paginated_transactions(df_full, page_size)
-                
-                st.markdown("### Lançamentos")
-                for _, r in df_page.iterrows():
-                    with st.container(border=True):
-                        col1, col2 = st.columns([1, 4])
-                        col1.markdown(f"**ID {int(r.id)}**")
-                        col2.markdown(f"**{r.data.strftime('%d/%m/%Y')}**")
-                        
-                        col1, col2, col3 = st.columns(3)
-                        col1.markdown(f"**Tipo:** {r.tipo.capitalize()}")
-                        col2.markdown(f"**Valor:** R$ {r.valor:,.2f}")
-                        
-                        if col3.button("🗑️ Excluir", key=f"del-{r.id}", use_container_width=True):
-                            try:
-                                if deletar(int(r.id)):
-                                    clear_transactions_cache()
-                                    if "current_page" in st.session_state:
-                                        del st.session_state["current_page"]
-                                    st.success("Lançamento excluído com sucesso!")
-                                    st.rerun()
-                                else:
-                                    st.error("Registro não encontrado ou já excluído")
-                            except Exception as e:
-                                st.error(f"Erro ao excluir: {str(e)}")
-                        
-                        if r.descricao:
-                            st.markdown(f"**Descrição:** {r.descricao}")
+                st.info("Integração contábil não configurada")
 
-                # Seção de faturamento
-                st.markdown("### Faturamento por descrição")
-                df_faturamento = faturamento_por_descricao_cached(data_inicio_str, data_fim_str)
-                if not df_faturamento.empty:
-                    st.dataframe(
-                        df_faturamento.head(10).rename(
-                            columns={"descricao": "Descrição", "total": "Total (R$)"}
-                        ),
-                        hide_index=True,
-                        height=250,
-                    )
-                    
-                    if len(df_faturamento) > 10 and st.button("Ver todos os resultados", use_container_width=True):
-                        st.dataframe(
-                            df_faturamento.rename(
-                                columns={"descricao": "Descrição", "total": "Total (R$)"}
-                            ),
-                            hide_index=True,
-                            height=500,
-                        )
-                else:
-                    st.info("Sem dados de faturamento")
+def pagina_chat() -> None:
+    st.header(f"📊 Dashboard Financeiro - {CLIENT_NAME}")
+    
+    # Métricas rápidas
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Faturamento Total", f"R$ {faturamento_total:,.2f}")
+    col2.metric("Despesa Total", f"R$ {despesa_total:,.2f}")
+    col3.metric("Lucro Total", f"R$ {lucro_total:,.2f}")
+    
+    # Gráfico de despesas
+    if not dados_df.empty:
+        st.subheader("Top 10 Despesas (Valor Total)")
+        fig = plot_despesas(dados_df)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Nenhuma despesa registrada para exibir o gráfico.")
+    
+    # Análise temporal
+    st.divider()
+    if not dados_df.empty:
+        st.subheader("📈 Análise Temporal")
+        
+        # Filtro por período
+        min_date = dados_df["data"].min().to_pydatetime()
+        max_date = dados_df["data"].max().to_pydatetime()
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            data_inicio = st.date_input("Data inicial", min_date)
+        with col2:
+            data_fim = st.date_input("Data final", max_date)
+        
+        # Converter para datetime
+        data_inicio_dt = datetime.combine(data_inicio, datetime.min.time())
+        data_fim_dt = datetime.combine(data_fim, datetime.max.time())
+        
+        # Gráfico de evolução
+        fig_evol = plot_evolucao(dados_df, data_inicio_dt, data_fim_dt)
+        if fig_evol:
+            st.plotly_chart(fig_evol, use_container_width=True)
+        else:
+            st.info("Nenhum dado disponível para o período selecionado.")
+    
+    # Histórico de conversa
+    st.divider()
+    st.subheader("💬 Conversa com o Analista")
+    memoria: ConversationSummaryBufferMemory = st.session_state.get("memoria", MEMORIA_PADRAO)
 
-                # Seção de despesas
-                st.markdown("### Despesas por descrição")
-                df_despesa = despesa_por_descricao_cached(data_inicio_str, data_fim_str)
-                if not df_despesa.empty:
-                    st.dataframe(
-                        df_despesa.head(10).rename(
-                            columns={"descricao": "Descrição", "total": "Total (R$)"}
-                        ),
-                        hide_index=True,
-                        height=250,
-                    )
-                    
-                    if len(df_despesa) > 10 and st.button("Ver todos os resultados de despesas", key="btn_despesa_todos", use_container_width=True):
-                        st.dataframe(
-                            df_despesa.rename(
-                                columns={"descricao": "Descrição", "total": "Total (R$)"}
-                            ),
-                            hide_index=True,
-                            height=500,
-                        )
-                else:
-                    st.info("Sem dados de despesas")
+    # Exibir histórico
+    if hasattr(memoria, 'chat_memory') and hasattr(memoria.chat_memory, 'messages'):
+        for msg in memoria.chat_memory.messages:
+            if isinstance(msg, HumanMessage):
+                st.chat_message("human").markdown(msg.content)
+            elif isinstance(msg, AIMessage):
+                st.chat_message("ai").markdown(msg.content)
+                # Adicionar botões de feedback para respostas do assistente
+                col_fb1, col_fb2, _ = st.columns([0.1, 0.1, 0.8])
+                with col_fb1:
+                    if st.button("👍", key=f"thumbs_up_{msg.content[:10]}"):
+                        logger.info(f"Feedback positivo: {msg.content[:100]}")
+                        st.toast("Obrigado pelo feedback positivo!")
+                with col_fb2:
+                    if st.button("👎", key=f"thumbs_down_{msg.content[:10]}"):
+                        logger.info(f"Feedback negativo: {msg.content[:100]}")
+                        st.toast("Obrigado pelo feedback. Vou melhorar!")
 
-                if st.button("📊 Gerar relatório completo em PDF", use_container_width=True):
-                    with st.spinner("Gerando relatório... (pode levar alguns segundos)"):
-                        pdf = gerar_pdf(df_full, data_inicio_str, data_fim_str)
-                        st.download_button(
-                            "⬇️ Baixar relatório em PDF",
-                            data=pdf,
-                            file_name="relatorio_financeiro.pdf",
-                            mime="application/pdf",
-                            use_container_width=True
-                        )
-
-        # Config
-        with tabs[2]:
-            st.markdown(f"**Modelo LLM:** {MODEL_NAME}")
-            if st.button("🔄 Limpar cache de dados", use_container_width=True):
-                st.cache_data.clear()
-                st.toast("Cache limpo!")
-
-# ---------- Página principal do chat -------------------------------
-def chat_page():
-    st.header("🤖 Analista Financeiro")
-
-    mem = st.session_state.get("memoria", MEM_DEFAULT)
-    for m in mem.buffer_as_messages:
-        st.chat_message(m.type).markdown(m.content)
-
-    entrada = st.chat_input("Digite aqui…")
+    entrada = st.chat_input("Fale com o Analista")
     if not entrada:
         return
-    st.chat_message("human").markdown(entrada)
 
-    lower = entrada.strip().lower()
-
-    if lower in {"faturamento por descricao", "faturamento por descrição"}:
-        df_desc = faturamento_por_descricao_cached()
-        if df_desc.empty:
-            st.chat_message("ai").markdown("Ainda não há lançamentos de faturamento.")
-        else:
-            st.chat_message("ai").markdown(
-                "\n".join(
-                    f"• **{row.descricao or '(sem descrição)'}**: R$ {row.total:,.2f}"
-                    for row in df_desc.itertuples()
-                )
-            )
+    # Remover blocos <think>…</think>
+    entrada_limpa = re.sub(r"<think>.*?</think>", "", entrada, flags=re.DOTALL | re.IGNORECASE).strip()
+    if not entrada_limpa:
+        st.info("(Comentário interno ignorado.)")
         return
 
-    if registrar_if_needed(entrada):
-        return
+    st.chat_message("human").markdown(entrada_limpa)
 
-    resposta = (
-        st.chat_message("ai")
-        .write_stream(
-            (make_prompt() | client).stream({
-                "input": entrada,
-                "chat_history": mem.buffer_as_messages,
-            })
+    # Verificar pedido de certidão
+    cert_path, categoria = tentar_enviar_certidao(entrada_limpa)
+    if cert_path and categoria:
+        resposta = f"Aqui está a CND {categoria} conforme solicitado."
+        bot_msg = st.chat_message("ai")
+        bot_msg.markdown(resposta)
+        with open(cert_path, "rb") as f:
+            pdf_bytes = f.read()
+        st.download_button(
+            f"📄 Baixar CND {categoria}",
+            data=pdf_bytes,
+            file_name=cert_path.name,
+            mime="application/pdf",
         )
-    )
-    mem.chat_memory.add_user_message(entrada)
-    mem.chat_memory.add_ai_message(resposta)
-    st.session_state["memoria"] = mem
+        memoria.chat_memory.add_user_message(entrada_limpa)
+        memoria.chat_memory.add_ai_message(resposta + f" [CND {categoria} anexada]")
+        st.session_state["memoria"] = memoria
+        return
 
-# ---------- Prevenir hibernação no Render --------------------------
-if os.environ.get("RENDER"):
-    import threading
-    import requests
-    import time
+    # Caso contrário, consultar o LLM
+    bot_container = st.chat_message("ai")
+    try:
+        resposta_llm = consultar_modelo(memoria, entrada_limpa)
+        bot_container.markdown(resposta_llm)
+        
+        # Adicionar botões de feedback
+        col_fb1, col_fb2, _ = st.columns([0.1, 0.1, 0.8])
+        with col_fb1:
+            if st.button("👍", key=f"thumbs_up_{resposta_llm[:10]}"):
+                logger.info(f"Feedback positivo: {resposta_llm[:100]}")
+                st.toast("Obrigado pelo feedback positivo!")
+        with col_fb2:
+            if st.button("👎", key=f"thumbs_down_{resposta_llm[:10]}"):
+                logger.info(f"Feedback negativo: {resposta_llm[:100]}")
+                st.toast("Obrigado pelo feedback. Vou melhorar!")
+                
+    except Exception as exc:
+        logger.exception("Erro na chamada do LLM: %s", exc)
+        resposta_llm = "❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente."
+        bot_container.error(resposta_llm)
 
-    def keep_alive():
-        while True:
-            try:
-                # Tenta acessar a própria aplicação
-                requests.get("https://seu-app.onrender.com", timeout=10)
-                logging.info("Ping enviado para prevenir hibernação")
-            except Exception as e:
-                logging.error(f"Erro no ping: {str(e)}")
-            time.sleep(240)  # 4 minutos (Render hiberna após 15-30 min)
+    memoria.chat_memory.add_user_message(entrada_limpa)
+    memoria.chat_memory.add_ai_message(resposta_llm)
+    st.session_state["memoria"] = memoria
 
-    # Inicia em thread separada
-    threading.Thread(target=keep_alive, daemon=True).start()
-
-# ---------- Entry-point --------------------------------------------
-def main():
+def main() -> None:
+    # Inicializar memória se não existir
     if "memoria" not in st.session_state:
-        st.session_state["memoria"] = ConversationBufferWindowMemory(
-            k=5, return_messages=True
-        )
+        st.session_state["memoria"] = MEMORIA_PADRAO
     
-    sidebar()
-    if msg := st.session_state.pop("toast", None):
-        st.toast(msg)
-    chat_page()
+    desenhar_sidebar()
+    pagina_chat()
 
 if __name__ == "__main__":
     main()
