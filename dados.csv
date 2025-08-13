@@ -1,6 +1,8 @@
 data;faturamento;despesa;descricao;lucro
 01/07/2025;2396,13;0,00;Receita de vendas;2396,13
 01/07/2025;0,00;140,56;outras despesas;-140,56
+02/07/2025;2960,55;0,00;Receita de vendas;2960,55
+02/07/2025;0,00;1448,50;outras despesas;-1448,50
 07/07/2025;225,00;0,00;Caixa inicial;225,00
 07/07/2025;2300,20;0,00;Venda de hambúrgueres;2300,20
 07/07/2025;0,00;281,92;Pão 274 unidades;-281,92
