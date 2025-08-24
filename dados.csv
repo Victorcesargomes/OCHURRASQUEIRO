@@ -1,77 +1,63 @@
 data;faturamento;despesa;descricao;lucro
-01/07/2025;2396,13;0,00;Receita de vendas;2396,13
-01/07/2025;0,00;140,56;outras despesas;-140,56
-01/07/2025;2994,12;0,00;Receita de vendas;2994,12
-01/07/2025;0,00;7,18;outras despesas;-7,18
-02/07/2025;2960,55;0,00;Receita de vendas;2960,55
-02/07/2025;0,00;1448,50;outras despesas;-1448,50
-02/07/2025;5106,01;0,00;Receita de vendas;5106,01
-02/07/2025;0,00;26,05;outras despesas;-26,05
-03/07/2025;3294,02;0,00;Receita de vendas;3294,02
-03/07/2025;0,00;1441,79;outras despesas;-1441,79
-07/07/2025;2525,20;0,00;Receita de vendas;2525,20
-07/07/2025;0,00;2326,77;outras despesas;-2326,77
-08/07/2025;2741,22;0,00;Receita de vendas;2741,22
-08/07/2025;0,00;900,40;outras despesas;-900,40
-09/07/2025;3354,39;0,00;Receita de vendas;3354,39
-09/07/2025;0,00;2148,60;outras despesas;-2148,60
-10/07/2025;1737,10;0,00;Receita de vendas;1737,10
-10/07/2025;0,00;5071,74;outras despesas;-5071,74
-12/07/2025;4054,39;0,00;Receita de vendas;4054,39
-12/07/2025;0,00;10108,22;outras despesas;-10108,22
-13/07/2025;2237,05;0,00;Receita de vendas;2237,05
-13/07/2025;0,00;1302,67;outras despesas;-1302,67
-14/07/2025;854,92;0,00;Receita de vendas;854,92
-14/07/2025;0,00;1555,27;outras despesas;-1555,27
-15/07/2025;1100,50;0,00;Receita de vendas;1100,50
-15/07/2025;0,00;4605,71;outras despesas;-4605,71
+01/07/2025;3.012,57;0,00;Receita de vendas;3.012,57
+01/07/2025;0,00;1.543,18;outras despesas;-1.543,18
+02/07/2025;1.559,25;0,00;Receita de vendas;1.559,25
+02/07/2025;0,00;5.300,19;outras despesas;-5.300,19
+03/07/2025;554,15;0,00;Receita de vendas;554,15
+03/07/2025;0,00;823,22;outras despesas;-823,22
+04/07/2025;359,04;0,00;Receita de vendas;359,04
+04/07/2025;0,00;664,34;outras despesas;-664,34
+05/07/2025;1.527,10;0,00;Receita de vendas;1.527,10
+05/07/2025;0,00;1.077,45;outras despesas;-1.077,45
+06/07/2025;442,42;0,00;Receita de vendas;442,42
+06/07/2025;0,00;1,51;outras despesas;-1,51
+07/07/2025;857,11;0,00;Receita de vendas;857,11
+07/07/2025;0,00;1.942,67;outras despesas;-1.942,67
+08/07/2025;902,17;0,00;Receita de vendas;902,17
+08/07/2025;0,00;1.111,28;outras despesas;-1.111,28
+09/07/2025;532,70;0,00;Receita de vendas;532,70
+09/07/2025;0,00;1.631,06;outras despesas;-1.631,06
+10/07/2025;882,90;0,00;Receita de vendas;882,90
+10/07/2025;0,00;4.316,52;outras despesas;-4.316,52
+11/07/2025;1.258,45;0,00;Receita de vendas;1.258,45
+11/07/2025;0,00;684,51;outras despesas;-684,51
+12/07/2025;98,83;0,00;Receita de vendas;98,83
+12/07/2025;0,00;2.087,83;outras despesas;-2.087,83
+13/07/2025;1.159,31;0,00;Receita de vendas;1.159,31
+13/07/2025;0,00;1.094,95;outras despesas;-1.094,95
+14/07/2025;532,79;0,00;Receita de vendas;532,79
+14/07/2025;0,00;1.555,27;outras despesas;-1.555,27
+15/07/2025;1.100,50;0,00;Receita de vendas;1.100,50
+15/07/2025;0,00;4.605,71;outras despesas;-4.605,71
 16/07/2025;942,28;0,00;Receita de vendas;942,28
-16/07/2025;0,00;2823,24;outras despesas;-2823,24
+16/07/2025;0,00;2.823,24;outras despesas;-2.823,24
 17/07/2025;925,98;0,00;Receita de vendas;925,98
-17/07/2025;0,00;3498,59;outras despesas;-3498,59
-18/07/2025;1277,15;0,00;Receita de vendas;1277,15
+17/07/2025;0,00;3.498,59;outras despesas;-3.498,59
+18/07/2025;1.277,15;0,00;Receita de vendas;1.277,15
 18/07/2025;0,00;596,70;outras despesas;-596,70
-19/07/2025;1750,91;0,00;Receita de vendas;1750,91
-19/07/2025;0,00;3522,79;outras despesas;-3522,79
-20/07/2025;1690,40;0,00;Receita de vendas;1690,40
-20/07/2025;0,00;1258,26;outras despesas;-1258,26
-21/07/2025;1421,43;0,00;Receita de vendas;1421,43
+19/07/2025;1.750,91;0,00;Receita de vendas;1.750,91
+19/07/2025;0,00;3.522,79;outras despesas;-3.522,79
+20/07/2025;1.690,40;0,00;Receita de vendas;1.690,40
+20/07/2025;0,00;1.258,26;outras despesas;-1.258,26
+21/07/2025;1.421,43;0,00;Receita de vendas;1.421,43
 21/07/2025;0,00;785,34;outras despesas;-785,34
-22/07/2025;1700,50;0,00;Receita de vendas;1700,50
-22/07/2025;0,00;2228,84;outras despesas;-2228,84
-23/07/2025;1810,63;0,00;Receita de vendas;1810,63
-23/07/2025;0,00;2293,21;outras despesas;-2293,21
-24/07/2025;1238,36;0,00;Receita de vendas;1238,36
-24/07/2025;0,00;2817,73;outras despesas;-2817,73
-25/07/2025;1427,34;0,00;Receita de vendas;1427,34
-25/07/2025;0,00;2548,42;outras despesas;-2548,42
-26/07/2025;1379,32;0,00;Receita de vendas;1379,32
-26/07/2025;0,00;2351,41;outras despesas;-2351,41
-27/07/2025;2467,61;0,00;Receita de vendas;2467,61
+22/07/2025;1.700,50;0,00;Receita de vendas;1.700,50
+22/07/2025;0,00;2.228,84;outras despesas;-2.228,84
+23/07/2025;1.810,63;0,00;Receita de vendas;1.810,63
+23/07/2025;0,00;2.293,21;outras despesas;-2.293,21
+24/07/2025;1.238,36;0,00;Receita de vendas;1.238,36
+24/07/2025;0,00;2.817,73;outras despesas;-2.817,73
+25/07/2025;1.427,34;0,00;Receita de vendas;1.427,34
+25/07/2025;0,00;2.548,42;outras despesas;-2.548,42
+26/07/2025;1.379,32;0,00;Receita de vendas;1.379,32
+26/07/2025;0,00;2.351,41;outras despesas;-2.351,41
+27/07/2025;2.467,61;0,00;Receita de vendas;2.467,61
 27/07/2025;0,00;349,85;outras despesas;-349,85
 28/07/2025;584,97;0,00;Receita de vendas;584,97
-28/07/2025;0,00;3138,00;outras despesas;-3138,00
-29/07/2025;1902,25;0,00;Receita de vendas;1902,25
+28/07/2025;0,00;3.138,00;outras despesas;-3.138,00
+29/07/2025;1.902,25;0,00;Receita de vendas;1.902,25
 29/07/2025;0,00;7,60;outras despesas;-7,60
-30/07/2025;1880,22;0,00;Receita de vendas;1880,22
-30/07/2025;0,00;2576,68;outras despesas;-2576,68
-31/07/2025;1566,62;0,00;Receita de vendas;1566,62
-31/07/2025;0,00;1302,05;outras despesas;-1302,05
-04/08/2025;1964,58;0,00;Receita de vendas;1964,58
-04/08/2025;0,00;6418,06;outras despesas;-6418,06
-05/08/2025;2086,84;0,00;Receita de vendas;2086,84
-05/08/2025;0,00;219,07;outras despesas;-219,07
-06/08/2025;2500,18;0,00;Receita de vendas;2500,18
-06/08/2025;0,00;1576,47;outras despesas;-1576,47
-07/08/2025;2418,84;0,00;Receita de vendas;2418,84
-07/08/2025;0,00;3541,28;outras despesas;-3541,28
-08/08/2025;2162,33;0,00;Receita de vendas;2162,33
-08/08/2025;0,00;1409,80;outras despesas;-1409,80
-09/08/2025;1989,02;0,00;Receita de vendas;1989,02
-09/08/2025;0,00;3634,31;outras despesas;-3634,31
-10/08/2025;2894,78;0,00;Receita de vendas;2894,78
-10/08/2025;0,00;2179,34;outras despesas;-2179,34
-11/08/2025;2305,17;0,00;Receita de vendas;2305,17
-11/08/2025;0,00;798,50;outras despesas;-798,50
-12/08/2025;98,83;0,00;Receita de vendas;98,83
-12/08/2025;0,00;2198,47;outras despesas;-2198,47
+30/07/2025;1.880,22;0,00;Receita de vendas;1.880,22
+30/07/2025;0,00;2.576,68;outras despesas;-2.576,68
+31/07/2025;1.566,62;0,00;Receita de vendas;1.566,62
+31/07/2025;0,00;1.302,05;outras despesas;-1.302,05
