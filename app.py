@@ -26,7 +26,7 @@ CSV_PATH = BASE_PATH / "dados.csv"
 CERT_PATH = BASE_PATH / "certidoes"
 LOGO_PATH = BASE_PATH / "logoo.png"
 CLIENT_NAME = "O Churrasqueiro"
-MODEL_NAME = "deepseek-r1-distill-llama-70b"
+MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
