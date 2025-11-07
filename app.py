@@ -13,7 +13,7 @@ import streamlit as st
 import plotly.express as px
 import requests
 from dotenv import load_dotenv
-from langchain_community.memory import ConversationBufferWindowMemory
+from langchain_community.memory import ConversationSummaryBufferMemory
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import BaseMessage, HumanMessage, AIMessage
@@ -26,7 +26,7 @@ CSV_PATH = BASE_PATH / "dados.csv"
 CERT_PATH = BASE_PATH / "certidoes"
 LOGO_PATH = BASE_PATH / "logoo.png"
 CLIENT_NAME = "O Churrasqueiro"
-MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
+MODEL_NAME = "llama-3.1-8b-instant"  # Modelo Groq válido
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
@@ -98,9 +98,11 @@ def carregar_df(caminho: Path) -> pd.DataFrame:
             return float(txt)
 
         for col in ("faturamento", "despesa", "lucro"):
-            df[col] = df[col].apply(_parse_money)
+            if col in df.columns:
+                df[col] = df[col].apply(_parse_money)
 
-        df["data"] = pd.to_datetime(df["data"], dayfirst=True, errors="coerce")
+        if "data" in df.columns:
+            df["data"] = pd.to_datetime(df["data"], dayfirst=True, errors="coerce")
         return df
     except Exception as exc:
         logger.exception("Erro ao carregar CSV: %s", exc)
@@ -109,20 +111,24 @@ def carregar_df(caminho: Path) -> pd.DataFrame:
 
 def df_para_prompt(df: pd.DataFrame) -> str:
     """Formata o DataFrame para exibição no prompt, com valores em Reais formatados."""
+    if df.empty:
+        return "Nenhum dado disponível."
+    
     df_display = df.copy()
     # Formata as colunas numéricas para o padrão brasileiro
     for col in ('faturamento', 'despesa', 'lucro'):
-        df_display[col] = df_display[col].apply(
-            lambda x: f'R$ {x:,.2f}'.replace(",", "X").replace(".", ",").replace("X", ".")
-        )
+        if col in df_display.columns:
+            df_display[col] = df_display[col].apply(
+                lambda x: f'R$ {x:,.2f}'.replace(",", "X").replace(".", ",").replace("X", ".")
+            )
     return df_display.to_csv(index=False, sep=";")
 
 dados_df = carregar_df(CSV_PATH)
 
 # Resumos financeiros
-faturamento_total = dados_df["faturamento"].sum() if not dados_df.empty else 0.0
-despesa_total = dados_df["despesa"].sum() if not dados_df.empty else 0.0
-lucro_total = dados_df["lucro"].sum() if not dados_df.empty else 0.0
+faturamento_total = dados_df["faturamento"].sum() if not dados_df.empty and "faturamento" in dados_df.columns else 0.0
+despesa_total = dados_df["despesa"].sum() if not dados_df.empty and "despesa" in dados_df.columns else 0.0
+lucro_total = dados_df["lucro"].sum() if not dados_df.empty and "lucro" in dados_df.columns else 0.0
 
 ##############################
 # Análise Financeira Avançada #
@@ -133,24 +139,38 @@ def analisar_financas(df: pd.DataFrame) -> Dict[str, Any]:
     if df.empty:
         return {}
     
+    analise = {}
+    
     # Top 5 despesas
-    top_despesas = df.nlargest(5, 'despesa')[['descricao', 'despesa']] if not df.empty else pd.DataFrame()
+    if 'despesa' in df.columns and 'descricao' in df.columns:
+        top_despesas = df.nlargest(5, 'despesa')[['descricao', 'despesa']] if not df.empty else pd.DataFrame()
+        analise["top_despesas"] = top_despesas
+    else:
+        analise["top_despesas"] = pd.DataFrame()
+    
     # Faturamento médio diário (considerando dias com faturamento)
-    faturamento_medio_diario = df[df['faturamento'] > 0]['faturamento'].mean() if not df.empty else 0.0
+    if 'faturamento' in df.columns:
+        faturamento_medio_diario = df[df['faturamento'] > 0]['faturamento'].mean() if not df.empty else 0.0
+        analise["faturamento_medio_diario"] = faturamento_medio_diario
+    else:
+        analise["faturamento_medio_diario"] = 0.0
+        
     # Margem de lucro (lucro total / faturamento total)
-    if not df.empty and df['faturamento'].sum() > 0:
+    if (not df.empty and 'faturamento' in df.columns and 'lucro' in df.columns and 
+        df['faturamento'].sum() > 0):
         margem_lucro = (df['lucro'].sum() / df['faturamento'].sum()) * 100
     else:
         margem_lucro = 0.0
-    # Despesas recorrentes (agrupadas por descrição, somadas e as 5 maiores)
-    despesas_recorrentes = df[df['despesa'] > 0].groupby('descricao')['despesa'].sum().nlargest(5) if not df.empty else pd.Series()
+    analise["margem_lucro"] = margem_lucro
     
-    return {
-        "top_despesas": top_despesas,
-        "faturamento_medio_diario": faturamento_medio_diario,
-        "margem_lucro": margem_lucro,
-        "despesas_recorrentes": despesas_recorrentes
-    }
+    # Despesas recorrentes (agrupadas por descrição, somadas e as 5 maiores)
+    if 'despesa' in df.columns and 'descricao' in df.columns:
+        despesas_recorrentes = df[df['despesa'] > 0].groupby('descricao')['despesa'].sum().nlargest(5) if not df.empty else pd.Series()
+        analise["despesas_recorrentes"] = despesas_recorrentes
+    else:
+        analise["despesas_recorrentes"] = pd.Series()
+    
+    return analise
 
 analise = analisar_financas(dados_df)
 
@@ -160,7 +180,7 @@ analise = analisar_financas(dados_df)
 
 def plot_despesas(df: pd.DataFrame):
     """Gráfico de pizza das top 10 despesas por valor total."""
-    if df.empty:
+    if df.empty or 'despesa' not in df.columns or 'descricao' not in df.columns:
         return None
         
     despesas_agrupadas = df[df['despesa'] > 0].groupby('descricao')['despesa'].sum().nlargest(10)
@@ -191,17 +211,24 @@ def plot_despesas(df: pd.DataFrame):
 
 def plot_evolucao(df: pd.DataFrame, data_inicio: datetime, data_fim: datetime):
     """Gráfico de linha da evolução financeira no período."""
+    if df.empty or 'data' not in df.columns:
+        return None
+        
     df_periodo = df[(df['data'] >= data_inicio) & (df['data'] <= data_fim)]
     if df_periodo.empty:
         return None
         
     # Agrupar por dia e somar valores
-    df_agrupado = df_periodo.groupby('data')[['faturamento', 'despesa', 'lucro']].sum().reset_index()
+    colunas_disponiveis = [col for col in ['faturamento', 'despesa', 'lucro'] if col in df_periodo.columns]
+    if not colunas_disponiveis:
+        return None
+        
+    df_agrupado = df_periodo.groupby('data')[colunas_disponiveis].sum().reset_index()
     
     fig = px.line(
         df_agrupado,
         x='data',
-        y=['faturamento', 'despesa', 'lucro'],
+        y=colunas_disponiveis,
         title=f'Evolução Financeira: {data_inicio.strftime("%d/%m/%Y")} - {data_fim.strftime("%d/%m/%Y")}',
         labels={'value': 'Valor (R$)', 'variable': 'Indicador'},
         color_discrete_map={
@@ -229,12 +256,17 @@ def plot_evolucao(df: pd.DataFrame, data_inicio: datetime, data_fim: datetime):
 ###################################
 # Configuração do modelo (Groq LLM) #
 ###################################
-client = ChatGroq(api_key=API_KEY, model=MODEL_NAME)
-MEMORIA_PADRAO = ConversationSummaryBufferMemory(
-    llm=client,
-    max_token_limit=2000,
-    return_messages=True
-)
+try:
+    client = ChatGroq(api_key=API_KEY, model=MODEL_NAME)
+    MEMORIA_PADRAO = ConversationSummaryBufferMemory(
+        llm=client,
+        max_token_limit=2000,
+        return_messages=True
+    )
+except Exception as e:
+    logger.error(f"Erro ao inicializar cliente Groq: {e}")
+    st.error(f"Erro ao inicializar o assistente: {e}")
+    st.stop()
 
 # Preparar a mensagem do sistema
 system_message = f"""
@@ -361,7 +393,11 @@ def consultar_modelo(_memoria: ConversationSummaryBufferMemory, entrada: str) ->
 
 def desenhar_sidebar() -> None:
     with st.sidebar:
-        st.image(LOGO_PATH, use_container_width=True)  # Parâmetro atualizado
+        if LOGO_PATH.exists():
+            st.image(str(LOGO_PATH), use_container_width=True)
+        else:
+            st.warning("Logo não encontrada")
+            
         abas = st.tabs(["Conversas", "Configurações"])
 
         with abas[0]:
@@ -412,7 +448,7 @@ def pagina_chat() -> None:
     
     # Análise temporal
     st.divider()
-    if not dados_df.empty:
+    if not dados_df.empty and "data" in dados_df.columns:
         st.subheader("📈 Análise Temporal")
         
         # Filtro por período
@@ -439,11 +475,11 @@ def pagina_chat() -> None:
     # Histórico de conversa
     st.divider()
     st.subheader("💬 Conversa com o Analista")
-    memoria: ConversationSummaryBufferMemory = st.session_state.get("memoria", MEMORIA_PADRAO)
+    memoria = st.session_state.get("memoria", MEMORIA_PADRAO)
 
     # Exibir histórico
     if hasattr(memoria, 'chat_memory') and hasattr(memoria.chat_memory, 'messages'):
-        for msg in memoria.chat_memory.messages:
+        for i, msg in enumerate(memoria.chat_memory.messages):
             if isinstance(msg, HumanMessage):
                 st.chat_message("human").markdown(msg.content)
             elif isinstance(msg, AIMessage):
@@ -451,11 +487,11 @@ def pagina_chat() -> None:
                 # Adicionar botões de feedback para respostas do assistente
                 col_fb1, col_fb2, _ = st.columns([0.1, 0.1, 0.8])
                 with col_fb1:
-                    if st.button("👍", key=f"thumbs_up_{msg.content[:10]}"):
+                    if st.button("👍", key=f"thumbs_up_{i}"):
                         logger.info(f"Feedback positivo: {msg.content[:100]}")
                         st.toast("Obrigado pelo feedback positivo!")
                 with col_fb2:
-                    if st.button("👎", key=f"thumbs_down_{msg.content[:10]}"):
+                    if st.button("👎", key=f"thumbs_down_{i}"):
                         logger.info(f"Feedback negativo: {msg.content[:100]}")
                         st.toast("Obrigado pelo feedback. Vou melhorar!")
 
@@ -499,11 +535,11 @@ def pagina_chat() -> None:
         # Adicionar botões de feedback
         col_fb1, col_fb2, _ = st.columns([0.1, 0.1, 0.8])
         with col_fb1:
-            if st.button("👍", key=f"thumbs_up_{resposta_llm[:10]}"):
+            if st.button("👍", key=f"thumbs_up_new"):
                 logger.info(f"Feedback positivo: {resposta_llm[:100]}")
                 st.toast("Obrigado pelo feedback positivo!")
         with col_fb2:
-            if st.button("👎", key=f"thumbs_down_{resposta_llm[:10]}"):
+            if st.button("👎", key=f"thumbs_down_new"):
                 logger.info(f"Feedback negativo: {resposta_llm[:100]}")
                 st.toast("Obrigado pelo feedback. Vou melhorar!")
                 
