@@ -13,7 +13,7 @@ import streamlit as st
 import plotly.express as px
 import requests
 from dotenv import load_dotenv
-from langchain.memory import ConversationBufferWindowMemory
+from langchain_community.memory import ConversationBufferWindowMemory
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import BaseMessage, HumanMessage, AIMessage
