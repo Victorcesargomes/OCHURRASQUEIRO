@@ -13,7 +13,7 @@ import streamlit as st
 import plotly.express as px
 import requests
 from dotenv import load_dotenv
-from langchain_community.memory import ConversationSummaryBufferMemory
+from langchain_community.memory import ConversationBufferWindowMemory
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import BaseMessage, HumanMessage, AIMessage
@@ -258,9 +258,8 @@ def plot_evolucao(df: pd.DataFrame, data_inicio: datetime, data_fim: datetime):
 ###################################
 try:
     client = ChatGroq(api_key=API_KEY, model=MODEL_NAME)
-    MEMORIA_PADRAO = ConversationSummaryBufferMemory(
-        llm=client,
-        max_token_limit=2000,
+    MEMORIA_PADRAO = ConversationBufferWindowMemory(
+        k=10,  # Mantém as últimas 10 interações
         return_messages=True
     )
 except Exception as e:
@@ -307,7 +306,7 @@ Base de dados detalhada:
 - As colunas correspondem a `Data`, `Faturamento`, `Despesa`, `Descrição` e `Lucro`.
 - Todos os valores estão em Reais (BRL).
 
-Se precisar de uma certidão, basta pedir — exemplos: “quero a CND estadual”, “quero a CND FGTS”, "quero a CND federal", "quero a CND fiscal etc.
+Se precisar de uma certidão, basta pedir — exemplos: "quero a CND estadual", "quero a CND FGTS", "quero a CND federal", "quero a CND fiscal etc.
 
 Termine perguntando se precisa de algo mais.
 """
@@ -374,13 +373,12 @@ def enviar_contabilidade(df: pd.DataFrame) -> bool:
 # Funções para o modelo   #
 ###########################
 
-@st.cache_data(show_spinner="Processando sua pergunta...")
-def consultar_modelo(_memoria: ConversationSummaryBufferMemory, entrada: str) -> str:
-    """Consulta o modelo com cache para melhor desempenho."""
+def consultar_modelo(memoria: ConversationBufferWindowMemory, entrada: str) -> str:
+    """Consulta o modelo."""
     try:
         resposta = chain.invoke({
             "input": entrada,
-            "chat_history": _memoria.chat_memory.messages
+            "chat_history": memoria.chat_memory.messages
         }).content
         return resposta
     except Exception as exc:
@@ -402,9 +400,8 @@ def desenhar_sidebar() -> None:
 
         with abas[0]:
             if st.button("🗑️ Apagar Histórico", use_container_width=True):
-                st.session_state["memoria"] = ConversationSummaryBufferMemory(
-                    llm=client,
-                    max_token_limit=2000,
+                st.session_state["memoria"] = ConversationBufferWindowMemory(
+                    k=10,
                     return_messages=True
                 )
                 st.success("Histórico apagado!")
@@ -416,7 +413,7 @@ def desenhar_sidebar() -> None:
                 - **Modelo:** {MODEL_NAME}
                 - **Usuário autorizado:** Ibson ({CLIENT_NAME})
                 - **Linhas CSV:** {len(dados_df)}
-                - **Certidões disponíveis:** {', '.join(CERTIDOES) or 'nenhuma'}
+                - **Certidões disponíveis:** {', '.join(CERTIDOES.keys()) or 'nenhuma'}
                 """
             )
             if CONTABIL_API_URL:
@@ -484,16 +481,6 @@ def pagina_chat() -> None:
                 st.chat_message("human").markdown(msg.content)
             elif isinstance(msg, AIMessage):
                 st.chat_message("ai").markdown(msg.content)
-                # Adicionar botões de feedback para respostas do assistente
-                col_fb1, col_fb2, _ = st.columns([0.1, 0.1, 0.8])
-                with col_fb1:
-                    if st.button("👍", key=f"thumbs_up_{i}"):
-                        logger.info(f"Feedback positivo: {msg.content[:100]}")
-                        st.toast("Obrigado pelo feedback positivo!")
-                with col_fb2:
-                    if st.button("👎", key=f"thumbs_down_{i}"):
-                        logger.info(f"Feedback negativo: {msg.content[:100]}")
-                        st.toast("Obrigado pelo feedback. Vou melhorar!")
 
     entrada = st.chat_input("Fale com o Analista")
     if not entrada:
@@ -528,25 +515,14 @@ def pagina_chat() -> None:
 
     # Caso contrário, consultar o LLM
     bot_container = st.chat_message("ai")
-    try:
-        resposta_llm = consultar_modelo(memoria, entrada_limpa)
-        bot_container.markdown(resposta_llm)
-        
-        # Adicionar botões de feedback
-        col_fb1, col_fb2, _ = st.columns([0.1, 0.1, 0.8])
-        with col_fb1:
-            if st.button("👍", key=f"thumbs_up_new"):
-                logger.info(f"Feedback positivo: {resposta_llm[:100]}")
-                st.toast("Obrigado pelo feedback positivo!")
-        with col_fb2:
-            if st.button("👎", key=f"thumbs_down_new"):
-                logger.info(f"Feedback negativo: {resposta_llm[:100]}")
-                st.toast("Obrigado pelo feedback. Vou melhorar!")
-                
-    except Exception as exc:
-        logger.exception("Erro na chamada do LLM: %s", exc)
-        resposta_llm = "❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente."
-        bot_container.error(resposta_llm)
+    with st.spinner("Processando sua pergunta..."):
+        try:
+            resposta_llm = consultar_modelo(memoria, entrada_limpa)
+            bot_container.markdown(resposta_llm)
+        except Exception as exc:
+            logger.exception("Erro na chamada do LLM: %s", exc)
+            resposta_llm = "❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente."
+            bot_container.error(resposta_llm)
 
     memoria.chat_memory.add_user_message(entrada_limpa)
     memoria.chat_memory.add_ai_message(resposta_llm)
