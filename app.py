@@ -25,7 +25,7 @@ CSV_PATH = BASE_PATH / "dados.csv"
 CERT_PATH = BASE_PATH / "certidoes"
 LOGO_PATH = BASE_PATH / "logoo.png"
 CLIENT_NAME = "O Churrasqueiro"
-MODEL_NAME = "llama-3.1-8b-instant"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
